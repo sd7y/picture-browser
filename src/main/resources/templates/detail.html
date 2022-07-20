@@ -5,26 +5,18 @@
     <title>Picture Browser</title>
     <link rel="stylesheet" href="/css/detail.css">
     <script src="/lib/jquery.js"></script>
+    <script src="/js/lazy-load-image.js"></script>
 </head>
 <body>
 
 <div class="root">
-    <div class="pages">
-        <a th:if="${pageNum > 1}" th:href="@{/detail(title=${title},pageNum=${pageNum - 1})}">上一页</a>
-        <a href="/">返回目录</a>
-        <a th:if="${pageNum < pageCount}" th:href="@{/detail(title=${title},pageNum=${pageNum + 1})}">下一页</a>
-        <div>当前第 <span th:text="${pageNum}"></span> 页, 共 <span th:text="${pageCount}"></span> 页</div>
-    </div>
     <div class="title" th:text="${title}"></div>
     <div th:each="path,iterStat : ${list}">
         <div class="img-desc" th:text="${path}"></div>
-        <img th:src="@{/picture(path=${path})}">
+        <img class="lazy-load" src="/res/loading.gif" th:data-src="@{/picture(path=${path})}">
     </div>
     <div class="pages">
-        <div>当前第 <span th:text="${pageNum}"></span> 页, 共 <span th:text="${pageCount}"></span> 页</div>
-        <a th:if="${pageNum > 1}" th:href="@{/detail(title=${title},pageNum=${pageNum - 1})}">上一页</a>
-        <a href="/">返回目录</a>
-        <a th:if="${pageNum < pageCount}" th:href="@{/detail(title=${title},pageNum=${pageNum + 1})}">下一页</a>
+        <a href="javascript:history.back()">返回目录</a>
     </div>
 </div>
 

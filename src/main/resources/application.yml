@@ -17,4 +17,4 @@ spring:
       enabled: true
 
 pictureBrowser:
-  rootPath: D:\workspace\alex\picture-browser\pic
+  rootPath: ${PICTURE_BROWSER_ROOT:/data/pictures}

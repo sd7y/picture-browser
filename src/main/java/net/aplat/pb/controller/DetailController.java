@@ -1,9 +1,7 @@
 package net.aplat.pb.controller;
 
-import net.aplat.pb.bo.PictureIndexBO;
 import net.aplat.pb.service.PictureService;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -11,9 +9,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.List;
 
 @Controller
-public class DetailController extends PageController{
-
-    private static final Integer DEFAULT_PAGE_SIZE = 20;
+public class DetailController {
 
     private final PictureService pictureService;
 
@@ -22,17 +18,11 @@ public class DetailController extends PageController{
     }
 
     @RequestMapping(value = "/detail")
-    public ModelAndView detail(@RequestParam("pageNum") Integer pageNum,
-                               @RequestParam("title") String title,
-                             @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-        pageNum = pageNum == null ? 1 : pageNum;
-        pageSize = pageSize == null ? DEFAULT_PAGE_SIZE : pageSize;
-
-        List<String> all = pictureService.getPictureList(title);
-        int total = all.size();
-        List<String> onePage = all.subList((pageNum - 1) * pageSize, Math.min(pageNum * pageSize, total));
-
-        ModelAndView modelAndView = page("detail", onePage, pageNum, pageSize, total);
+    public ModelAndView detail(@RequestParam("title") String title) {
+        List<String> pictureList = pictureService.getPictureList(title);
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("detail");
+        modelAndView.addObject("list", pictureList);
         modelAndView.addObject("title", title);
         return modelAndView;
     }

@@ -3,6 +3,7 @@ package net.aplat.pb.service;
 import net.aplat.pb.bo.PictureIndexBO;
 import net.aplat.pb.common.PBConfiguration;
 import net.aplat.pb.exception.IllegalFileAccessError;
+import net.aplat.pb.util.AlphanumComparator;
 import net.aplat.pb.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,10 @@ public class PictureService {
     }
 
     private PictureIndexBO toPictureIndexBO(File dir) {
-        List<File> files = getSortedFiles(dir);
+        List<File> files = getSortedFiles(dir).stream().filter(f -> f.getName().endsWith(".jpg")
+                || f.getName().endsWith(".png")
+                || f.getName().endsWith(".gif")
+                || f.getName().endsWith(".jpeg")).collect(Collectors.toList());
         if (files.size() == 0) {
             return null;
         }
@@ -74,15 +78,16 @@ public class PictureService {
             File[] files = dir.listFiles();
             if (files != null && files.length > 0) {
                 List<File> list = Arrays.asList(files);
-                list.sort((a, b) -> {
-                    try {
-                        Integer ia = Integer.parseInt(a.getName().substring(0, a.getName().length() - 4));
-                        Integer ib = Integer.parseInt(b.getName().substring(0, b.getName().length() - 4));
-                        return ia - ib;
-                    } catch (Exception e) {
-                        return 0;
-                    }
-                });
+//                list.sort((a, b) -> {
+//                    try {
+//                        Integer ia = Integer.parseInt(a.getName().substring(0, a.getName().length() - 4));
+//                        Integer ib = Integer.parseInt(b.getName().substring(0, b.getName().length() - 4));
+//                        return ia - ib;
+//                    } catch (Exception e) {
+//                        return 0;
+//                    }
+//                });
+                list.sort((a, b) -> new AlphanumComparator().compare(a.getName(), b.getName()));
                 return list;
             }
         }

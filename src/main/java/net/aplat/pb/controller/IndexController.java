@@ -12,7 +12,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping
-public class IndexController extends PageController {
+public class IndexController {
 
     private static final Integer DEFAULT_PAGE_SIZE = 9;
 
@@ -36,6 +36,13 @@ public class IndexController extends PageController {
         int total = all.size();
         List<PictureIndexBO> onePage = all.subList((pageNum - 1) * pageSize, Math.min(pageNum * pageSize, total));
 
-        return page("page", onePage, pageNum, pageSize, total);
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("page");
+        modelAndView.addObject("list", onePage);
+        modelAndView.addObject("pageNum", pageNum);
+        modelAndView.addObject("pageSize", pageSize);
+        modelAndView.addObject("totalCount", total);
+        modelAndView.addObject("pageCount", total % pageSize == 0 ? total / pageSize : total / pageSize + 1);
+        return modelAndView;
     }
 }
