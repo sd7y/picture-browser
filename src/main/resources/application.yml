@@ -1,0 +1,20 @@
+server:
+  port: 9000
+
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:./picture-browser
+    username: sa
+    password: poiuytQWE123!
+  jpa:
+    database: h2
+    hibernate:
+      ddl-auto: update
+  h2:
+    console:
+      path: /h2-console
+      enabled: true
+
+pictureBrowser:
+  rootPath: D:\workspace\alex\picture-browser\pic
