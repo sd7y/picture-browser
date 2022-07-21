@@ -1,10 +1,12 @@
 package net.aplat.pb.controller;
 
+import net.aplat.pb.exception.IllegalGroupException;
 import net.aplat.pb.service.PictureService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -22,9 +24,9 @@ public class FileController {
         this.pictureService = pictureService;
     }
 
-    @RequestMapping(value = "/picture", params = {"path"})
-    public void getPicture(final HttpServletResponse response, @RequestParam("path") String path) {
-        Optional<File> file = pictureService.getPicture(path);
+    @RequestMapping(value = "/{group}/picture", params = {"path"})
+    public void getPicture(final HttpServletResponse response, @PathVariable String group, @RequestParam("path") String path) throws IllegalGroupException {
+        Optional<File> file = pictureService.getPicture(group, path);
         if (file.isPresent()) {
             File image = file.get();
             MediaTypeFactory.getMediaType(image.getAbsolutePath()).ifPresent(m -> response.setContentType(m.toString()));

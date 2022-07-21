@@ -1,8 +1,12 @@
 package net.aplat.pb.service;
 
 import net.aplat.pb.bo.PictureIndexBO;
-import net.aplat.pb.common.PBConfiguration;
-import net.aplat.pb.exception.IllegalFileAccessError;
+import net.aplat.pb.common.PictureBrowserConf;
+import net.aplat.pb.dao.PictureSetDao;
+import net.aplat.pb.entity.Picture;
+import net.aplat.pb.entity.PictureSet;
+import net.aplat.pb.exception.IllegalFileAccessException;
+import net.aplat.pb.exception.IllegalGroupException;
 import net.aplat.pb.util.AlphanumComparator;
 import net.aplat.pb.util.FileUtils;
 import org.slf4j.Logger;
@@ -18,20 +22,22 @@ import java.util.stream.Collectors;
 public class PictureService {
 
     private final Logger logger = LoggerFactory.getLogger(PictureService.class);
-    private final PBConfiguration pbConfiguration;
+    private final PictureBrowserConf pictureBrowserConf;
+    private final PictureSetDao pictureSetDao;
 
-    public PictureService(PBConfiguration pbConfiguration) {
-        this.pbConfiguration = pbConfiguration;
+    public PictureService(PictureBrowserConf pictureBrowserConf, PictureSetDao pictureSetDao) {
+        this.pictureBrowserConf = pictureBrowserConf;
+        this.pictureSetDao = pictureSetDao;
     }
 
-    public List<PictureIndexBO> getIndex(String path) {
+    public List<PictureIndexBO> getIndex(String group, String path) throws IllegalGroupException {
         try {
-            File dir = FileUtils.getFile(pbConfiguration.getRootPath(), path);
+            File dir = FileUtils.getFile(pictureBrowserConf.getGroup(group), path);
             return getSortedFiles(dir)
                     .stream().map(this::toPictureIndexBO)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
-        } catch (IllegalFileAccessError e) {
+        } catch (IllegalFileAccessException e) {
             logger.info("IllegalFileAccessError: {}", e.getMessage());
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
@@ -39,28 +45,57 @@ public class PictureService {
         return Collections.emptyList();
     }
 
-    public List<String> getPictureList(final String path) {
+    public List<String> getPictureList(final String group, final String path) throws IllegalGroupException {
         try {
-            return getSortedFiles(FileUtils.getFile(pbConfiguration.getRootPath(), path)).stream()
+            return getSortedFiles(FileUtils.getFile(pictureBrowserConf.getGroup(group), path)).stream()
                     .map(file -> path + File.separator + file.getName())
                     .collect(Collectors.toList());
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-        } catch (IllegalFileAccessError e) {
+        } catch (IllegalFileAccessException e) {
             logger.info("IllegalFileAccessError: {}", e.getMessage());
         }
         return Collections.emptyList();
     }
-    public Optional<File> getPicture(String path) {
+
+    public Optional<File> getPicture(String group, String path) throws IllegalGroupException {
         try {
-            return Optional.of(FileUtils.getFile(pbConfiguration.getRootPath(), path));
+            return Optional.of(FileUtils.getFile(pictureBrowserConf.getGroup(group), path));
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-        } catch (IllegalFileAccessError e) {
+        } catch (IllegalFileAccessException e) {
             logger.info("IllegalFileAccessError: {}", e.getMessage());
         }
         return Optional.empty();
     }
+
+    public void scanPictureSets(String group, boolean force) throws IllegalGroupException {
+        File root = new File(pictureBrowserConf.getGroup(group));
+        List<File> sets = getSortedFiles(root);
+        logger.info("Scanning root '{}', total sets: {}", root.getAbsolutePath(), sets.size());
+        for (File set : sets) {
+            String title = set.getName();
+            logger.info("Scanning '{}'", title);
+            PictureSet pictureSet = pictureSetDao.findPictureSetByTitleAndGroupName(title, group).orElse(new PictureSet(title, group));
+            if (pictureSet.getId() != null && !force) {
+                logger.info("Skipped '{}'", title);
+                continue;
+            }
+            pictureSet.getPictures().clear();
+            List<File> pictures = getSortedFiles(set);
+            for (int i = 0; i < pictures.size(); i++) {
+                File pic = pictures.get(i);
+                Picture picture = new Picture();
+                picture.setName(pic.getName());
+                picture.setOrderNum(i);
+                picture.setPath(title);
+                picture.setPictureSet(pictureSet);
+                pictureSet.getPictures().add(picture);
+            }
+            pictureSetDao.save(pictureSet);
+        }
+    }
+
 
     private PictureIndexBO toPictureIndexBO(File dir) {
         List<File> files = getSortedFiles(dir).stream().filter(f -> f.getName().endsWith(".jpg")
@@ -78,15 +113,6 @@ public class PictureService {
             File[] files = dir.listFiles();
             if (files != null && files.length > 0) {
                 List<File> list = Arrays.asList(files);
-//                list.sort((a, b) -> {
-//                    try {
-//                        Integer ia = Integer.parseInt(a.getName().substring(0, a.getName().length() - 4));
-//                        Integer ib = Integer.parseInt(b.getName().substring(0, b.getName().length() - 4));
-//                        return ia - ib;
-//                    } catch (Exception e) {
-//                        return 0;
-//                    }
-//                });
                 list.sort((a, b) -> new AlphanumComparator().compare(a.getName(), b.getName()));
                 return list;
             }

@@ -4,7 +4,7 @@ server:
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:./picture-browser
+    url: jdbc:h2:${PICTURE_BROWSER_DB:/data/db/pb}
     username: sa
     password: poiuytQWE123!
   jpa:
@@ -16,5 +16,5 @@ spring:
       path: /h2-console
       enabled: true
 
-pictureBrowser:
-  rootPath: ${PICTURE_BROWSER_ROOT:/data/pictures}
+picture-browser:
+  groups: "${PICTURE_BROWSER_ROOT:{'default':'/data/pictures','picture2':'/data/pictures2'}}"

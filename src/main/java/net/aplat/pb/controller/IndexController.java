@@ -1,6 +1,7 @@
 package net.aplat.pb.controller;
 
 import net.aplat.pb.bo.PictureIndexBO;
+import net.aplat.pb.exception.IllegalGroupException;
 import net.aplat.pb.service.PictureService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,22 +24,29 @@ public class IndexController {
     }
 
     @RequestMapping("/")
-    public ModelAndView index() {
-        return page(1, DEFAULT_PAGE_SIZE);
+    public ModelAndView index() throws IllegalGroupException {
+        return index("default");
     }
 
-    @RequestMapping(value = "/page/{pageNum}")
-    public ModelAndView page(@PathVariable("pageNum") Integer pageNum,
-                             @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    @RequestMapping("/{group}")
+    public ModelAndView index(@PathVariable("group") String group) throws IllegalGroupException {
+        return page(group,1, DEFAULT_PAGE_SIZE);
+    }
+
+    @RequestMapping(value = "/{group}/page/{pageNum}")
+    public ModelAndView page(@PathVariable("group") String group,
+                             @PathVariable("pageNum") Integer pageNum,
+                             @RequestParam(value = "pageSize", required = false) Integer pageSize) throws IllegalGroupException {
         pageSize = pageSize == null ? DEFAULT_PAGE_SIZE : pageSize;
 
-        List<PictureIndexBO> all = pictureService.getIndex("/");
+        List<PictureIndexBO> all = pictureService.getIndex(group, "/");
         int total = all.size();
         List<PictureIndexBO> onePage = all.subList((pageNum - 1) * pageSize, Math.min(pageNum * pageSize, total));
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("page");
         modelAndView.addObject("list", onePage);
+        modelAndView.addObject("group", group);
         modelAndView.addObject("pageNum", pageNum);
         modelAndView.addObject("pageSize", pageSize);
         modelAndView.addObject("totalCount", total);
