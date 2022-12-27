@@ -11,12 +11,19 @@
 
 <div class="root">
     <div class="title" th:text="${title}"></div>
+    <div class="pages">
+        <a href="javascript:history.back()">返回目录</a> <div>当前第 <span th:text="${pageNum}"></span> 页, 共 <span th:text="${pageCount}"></span> 页</div>
+        <a th:if="${pageNum > 1}" th:href="@{/{group}/detail(group=${group},title=${title},pageNum=${pageNum - 1})}">上一页</a>
+        <a th:if="${pageNum < pageCount}" th:href="@{/{group}/detail(group=${group},title=${title},pageNum=${pageNum + 1})}">下一页</a>
+    </div>
     <div th:each="path,iterStat : ${list}">
         <div class="img-desc" th:text="${path}"></div>
         <img class="lazy-load" src="/res/loading.gif" th:data-src="@{/{group}/picture(group=${group},path=${path})}">
     </div>
     <div class="pages">
-        <a href="javascript:history.back()">返回目录</a>
+        <a href="javascript:history.back()">返回目录</a> <div>当前第 <span th:text="${pageNum}"></span> 页, 共 <span th:text="${pageCount}"></span> 页</div>
+        <a th:if="${pageNum > 1}" th:href="@{/{group}/detail(group=${group},title=${title},pageNum=${pageNum - 1})}">上一页</a>
+        <a th:if="${pageNum < pageCount}" th:href="@{/{group}/detail(group=${group},title=${title},pageNum=${pageNum + 1})}">下一页</a>
     </div>
 </div>
 
