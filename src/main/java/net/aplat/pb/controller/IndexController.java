@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping
@@ -24,24 +25,34 @@ public class IndexController {
     }
 
     @RequestMapping("/")
-    public ModelAndView index() throws IllegalGroupException {
-        return index("default");
+    public ModelAndView index(@RequestParam(value = "s", required = false) String search) throws IllegalGroupException {
+        return index("default", search);
     }
 
     @RequestMapping("/{group}")
-    public ModelAndView index(@PathVariable("group") String group) throws IllegalGroupException {
-        return page(group,1, DEFAULT_PAGE_SIZE);
+    public ModelAndView index(@PathVariable("group") String group,
+                              @RequestParam(value = "s", required = false) String search) throws IllegalGroupException {
+        return page(group,1, DEFAULT_PAGE_SIZE, search);
     }
 
     @RequestMapping(value = "/{group}/page/{pageNum}")
     public ModelAndView page(@PathVariable("group") String group,
                              @PathVariable("pageNum") Integer pageNum,
-                             @RequestParam(value = "pageSize", required = false) Integer pageSize) throws IllegalGroupException {
+                             @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                             @RequestParam(value = "s", required = false) String search) throws IllegalGroupException {
         pageSize = pageSize == null ? DEFAULT_PAGE_SIZE : pageSize;
 
         List<PictureIndexBO> all = pictureService.getIndex(group, "/");
+        if (search != null && search.trim().length() > 0) {
+            System.out.println("Search word is: " + search);
+            all = all.stream().filter(pi -> pi.getTitle().contains(search.trim())).collect(Collectors.toList());
+        }
         int total = all.size();
-        List<PictureIndexBO> onePage = all.subList((pageNum - 1) * pageSize, Math.min(pageNum * pageSize, total));
+        int start = (pageNum - 1) * pageSize;
+        if (start >= total) {
+            start = 0;
+        }
+        List<PictureIndexBO> onePage = all.subList(start, Math.min(pageNum * pageSize, total));
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("page");
@@ -51,6 +62,7 @@ public class IndexController {
         modelAndView.addObject("pageSize", pageSize);
         modelAndView.addObject("totalCount", total);
         modelAndView.addObject("pageCount", total % pageSize == 0 ? total / pageSize : total / pageSize + 1);
+        modelAndView.addObject("search", search != null && search.trim().length() > 0 ? search : "");
         return modelAndView;
     }
 }

@@ -17,4 +17,4 @@ spring:
       enabled: true
 
 picture-browser:
-  groups: "${PICTURE_BROWSER_ROOT:{'default':'/data/pictures','picture2':'/data/pictures2'}}"
+  groups: "${PICTURE_BROWSER_GROUPS:{'default':'/data/pictures','picture2':'/data/pictures2'}}"

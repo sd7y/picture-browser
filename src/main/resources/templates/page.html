@@ -21,8 +21,8 @@
 
 <div class="pages">
     <div>当前第 <span th:text="${pageNum}"></span> 页, 共 <span th:text="${pageCount}"></span> 页</div>
-    <a th:if="${pageNum > 1}" th:href="@{/{group}/page/{pageNum}(group=${group},pageNum=${pageNum - 1})}">上一页</a>
-    <a th:if="${pageNum < pageCount}" th:href="@{/{group}/page/{pageNum}(group=${group},pageNum=${pageNum + 1})}">下一页</a>
+    <a th:if="${pageNum > 1}" th:href="@{/{group}/page/{pageNum}(group=${group},pageNum=${pageNum - 1},s=${search})}">上一页</a>
+    <a th:if="${pageNum < pageCount}" th:href="@{/{group}/page/{pageNum}(group=${group},pageNum=${pageNum + 1},s=${search})}">下一页</a>
 </div>
 </body>
 </html>
