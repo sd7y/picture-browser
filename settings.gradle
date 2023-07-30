@@ -1,1 +1,4 @@
 rootProject.name = 'picture-browser'
+
+include('auth')
+include('pic')
