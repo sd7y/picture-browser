@@ -1,0 +1,7 @@
+authorizeRequests:
+  antMatchers:
+    - /public/**: permitAll
+    - /admin/**: hasRole('ADMIN')
+    - /user/**: hasRole('USER')
+    - /api/**: hasAnyRole('ADMIN', 'USER')
+    - /private/**: authenticated()
