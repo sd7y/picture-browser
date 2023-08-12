@@ -5,3 +5,8 @@ authorizeRequests:
     - /user/**: hasRole('USER')
     - /api/**: hasAnyRole('ADMIN', 'USER')
     - /private/**: authenticated()
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/openai-proxy
